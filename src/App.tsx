@@ -6,6 +6,12 @@ import './App.css';
 // Constants
 const TWITTER_HANDLE = '_buildspace';
 const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
+const TEST_GIFS = [
+	'https://i.giphy.com/media/eIG0HfouRQJQr1wBzz/giphy.webp',
+	'https://media3.giphy.com/media/L71a8LW2UrKwPaWNYM/giphy.gif?cid=ecf05e47rr9qizx2msjucl1xyvuu47d7kf25tqt2lvo024uo&rid=giphy.gif&ct=g',
+	'https://media4.giphy.com/media/AeFmQjHMtEySooOc8K/giphy.gif?cid=ecf05e47qdzhdma2y3ugn32lkgi972z9mpfzocjj6z1ro4ec&rid=giphy.gif&ct=g',
+	'https://i.giphy.com/media/PAqjdPkJLDsmBRSYUp/giphy.webp'
+]
 
 declare global {
   interface Window {
@@ -17,6 +23,7 @@ const App = () => {
   let solana: any;
   let [walletAddr, setWalletAddr] = useState("");
 
+  // Attempts to find if the user has a wallet installed, specifically Phantom.
   function tryFindWallet(): Result<string, string> {
     try {
       if (solana) {
@@ -33,7 +40,10 @@ const App = () => {
     }
   }
 
-  async function tryConnectWallet(onlyIfTrusted: boolean): Promise<Result<string, string>> {
+  // Attempts to connect to the user's wallet.
+  async function tryConnectWallet(
+    onlyIfTrusted: boolean
+  ): Promise<Result<string, string>> {
     try {
       let response: any;
       if (onlyIfTrusted) {
@@ -48,7 +58,12 @@ const App = () => {
       return Err((error as Error).message);
     }
   }
-  
+ 
+  /* 
+   * Things to be done on load, such as:
+   * - Finding if the user has a Solana wallet installed (namely Phantom).
+   * - Attempting to connect to their wallet, but only if it's trusted.
+   */
   async function onLoad() {
     solana = window.solana;
     const found: Result<string, string> = tryFindWallet();
@@ -61,11 +76,13 @@ const App = () => {
     }
   }
 
+  // Attaches onLoad as an event listener.
   useEffect(() => {
     window.addEventListener("load", onLoad);
     return () => window.removeEventListener("load", onLoad);
   }, []);
 
+  // Renders the wallet connection button.
   function renderWalletConnect() {
     return <button
       className="cta-button connect-wallet-button"
@@ -80,6 +97,7 @@ const App = () => {
     </button>;
   }
 
+  // Renders the web app's page.
   function render() {
     return (
       <div className="App">
