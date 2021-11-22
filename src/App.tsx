@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import twitterLogo from './assets/twitter-logo.svg';
-import { Ok, Err, Result, Some, None, Option } from 'ts-results';
+import { Ok, Err, Result } from 'ts-results';
 import './App.css';
 
 // Constants
