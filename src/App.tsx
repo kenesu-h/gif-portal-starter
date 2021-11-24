@@ -5,6 +5,7 @@ import './App.css';
 import idl from './idl.json';
 import { Connection, PublicKey, clusterApiUrl, Commitment, ConnectionConfig, ConfirmOptions } from '@solana/web3.js';
 import { Program, Provider, web3, Idl } from '@project-serum/anchor';
+import kp from './keypair.json';
 
 // Constants
 const TWITTER_HANDLE = '_buildspace';
@@ -25,7 +26,11 @@ declare global {
 }
 
 const { SystemProgram, Keypair }: any = web3;
-let baseAccount: any = Keypair.generate();
+
+const arr: any = Object.values(kp._keypair.secretKey);
+const secret: Uint8Array = new Uint8Array(arr);
+const baseAccount: any = web3.Keypair.fromSecretKey(secret);
+
 const programID: PublicKey = new PublicKey(idl.metadata.address);
 const network: any = clusterApiUrl("devnet");
 const opts: { preflightCommitment: string } = {
@@ -136,10 +141,10 @@ const App = () => {
     );
   }
 
-  function gifToContainer(gif: string) {
+  function gifToContainer(item: any, index: any) {
     return (
-      <div className="gif-item" key={gif}>
-        <img src={gif} alt={gif} />
+      <div className="gif-item" key={index}>
+        <img src={item.gifLink} />
       </div>
     );
   }
@@ -179,9 +184,24 @@ const App = () => {
 
   async function sendGif() {
     if (inputValue.length > 0) {
-      console.log("GIF link:", inputValue);
+      try {
+        const provider: Provider = getProvider();
+        const program: Program = new Program(idl as Idl, programID, provider);
+
+        await program.rpc.addGif(inputValue, {
+          accounts: {
+            baseAccount: baseAccount.publicKey,
+            user: provider.wallet.publicKey
+          }
+        });
+        console.log("GIF successfully sent to program:", inputValue);
+
+        await tryGetGifList();
+      } catch (error) {
+        console.log("Error sending GIF:", error);
+      }
     } else {
-      console.log("Empty input, try again.");
+      alert("Empty input, try again.");
     }
   }
 
@@ -235,7 +255,7 @@ const App = () => {
     } else {
       return (
         <div className="gif-grid">
-          {gifList.map(gifToContainer)}
+          {gifList.map((item, index) => gifToContainer(item, index))}
         </div>
       );
     }
