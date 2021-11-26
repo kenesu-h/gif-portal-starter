@@ -111,6 +111,15 @@
   object-fit: cover;
 }
 
+.gif-item .gif-subsection {
+  color: white;
+  margin: 5px auto;
+}
+
+.gif-item .vote-button {
+  cursor: pointer;
+}
+
 .connected-container input[type='text'] {
   display: inline-block;
   color: white;

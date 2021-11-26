@@ -6,6 +6,13 @@ import idl from './idl.json';
 import { Connection, PublicKey, clusterApiUrl, Commitment, ConnectionConfig, ConfirmOptions } from '@solana/web3.js';
 import { Program, Provider, web3, Idl } from '@project-serum/anchor';
 import kp from './keypair.json';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  IconLookup,
+  IconDefinition,
+  findIconDefinition
+} from '@fortawesome/fontawesome-svg-core';
+import {faHeart, faHeartBroken} from '@fortawesome/free-solid-svg-icons';
 
 // Constants
 const TWITTER_HANDLE = '_buildspace';
@@ -142,9 +149,34 @@ const App = () => {
   }
 
   function gifToContainer(item: any, index: any) {
+    console.log(item);
     return (
-      <div className="gif-item" key={index}>
+      <div
+        className="gif-item"
+        key={index}
+        // onClick={() => toggleVoteGif(item.gifLink)}
+      >
         <img src={item.gifLink} />
+        <div className="gif-subsection">
+          <span className="vote-button" onClick={() => toggleVoteGif(item.gifLink)}>
+            {
+              item.voted
+                .map((userAddr: any) => userAddr.toString())
+                .includes(item.userAddr.toString())
+              ?
+              <FontAwesomeIcon icon={faHeartBroken} />
+              :
+              <FontAwesomeIcon icon={faHeart} />
+            }
+          </span>
+          &nbsp;
+          <span>
+            <strong>Liked:</strong> {item.voted.length} times.
+          </span>
+        </div>
+        <div className="gif-subsection">
+          <strong>Submitted by:</strong> {item.userAddr.toString()}
+        </div> 
       </div>
     );
   }
@@ -202,6 +234,25 @@ const App = () => {
       }
     } else {
       alert("Empty input, try again.");
+    }
+  }
+
+  async function toggleVoteGif(gifLink: string) {
+    try {
+      const provider: Provider = getProvider();
+      const program: Program = new Program(idl as Idl, programID, provider);
+
+      await program.rpc.toggleVoteGif(gifLink, {
+        accounts: {
+          baseAccount: baseAccount.publicKey,
+          user: provider.wallet.publicKey
+        }
+      });
+      console.log("Gif vote toggled successfully:", gifLink);
+
+      await tryGetGifList();
+    } catch (error) {
+      console.log("Error toggling vote for GIF:", error);
     }
   }
 
